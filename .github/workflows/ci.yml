@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Workflow JSON structural check
+        run: |
+          python - <<'EOF'
+          import json, glob, sys
+
+          errors = []
+          files = sorted(glob.glob("workflows/*.json"))
+          for path in files:
+              try:
+                  wf = json.load(open(path))
+              except Exception as e:
+                  errors.append(f"{path}: invalid JSON ({e})")
+                  continue
+              missing = [k for k in ("name", "nodes", "connections") if k not in wf]
+              if missing:
+                  errors.append(f"{path}: missing keys {missing}")
+                  continue
+              node_names = {n["name"] for n in wf["nodes"]}
+              for src, targets in wf["connections"].items():
+                  if src not in node_names:
+                      errors.append(f"{path}: connection source '{src}' not a node")
+                  for main_list in targets.get("main", []):
+                      for edge in main_list:
+                          if edge.get("node") not in node_names:
+                              errors.append(f"{path}: edge to '{edge.get('node')}' not a node")
+                  for n in wf["nodes"]:
+                      if "type" not in n:
+                          errors.append(f"{path}: node '{n['name']}' missing type")
+          if not files:
+              errors.append("no workflows/ *.json found")
+          if errors:
+              print("\n".join(errors))
+              sys.exit(1)
+          print(f"OK: {len(files)} workflow JSONs structurally valid")
+          EOF
+      - name: README references match files
+        run: |
+          python - <<'EOF'
+          import glob, re
+          workflows = [p.split("/")[-1] for p in glob.glob("workflows/*.json")]
+          readme = open("README.md").read()
+          missing = [w for w in workflows if w not in readme]
+          if missing:
+              raise SystemExit(f"README missing references: {missing}")
+          print("OK: README references all workflow files")
+          EOF
+      - name: Make equivalents doc present
+        run: |
+          test -f make/MAKE_EQUIVALENTS.md && echo "OK: make/ docs" || { echo "missing make docs"; exit 1; }

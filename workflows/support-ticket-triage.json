@@ -1,0 +1,187 @@
+{
+  "name": "[2] Support Ticket Triage",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ticket",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "ticket-webhook",
+      "name": "Webhook (Ticket created)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-760, 0],
+      "webhookId": "6b20cd3f-4e3c-5b7c-ad2e-ticket0000001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nreturn [{\n  json: {\n    ticketId: raw.ticketId || 'T-' + Date.now(),\n    channel: raw.channel || 'email',\n    subject: (raw.subject || '').trim(),\n    message: (raw.message || '').trim(),\n    priority: (raw.priority || 'normal')\n  }\n}];"
+      },
+      "id": "ticket-normalize",
+      "name": "Code: Normalize Ticket",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-540, 0]
+    },
+    {
+      "parameters": {
+        "options": {
+          "response": {
+            "response": "text",
+            "limit": "300"
+          },
+          "model": {
+            "temperature": 0
+          }
+        },
+        "resource": "chat",
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "user",
+              "content": "Classify this support ticket. Return ONLY JSON: {category, sentiment, urgency, answerable}\n\ncategory: billing|bug|question|other\nsentiment: negative|neutral|positive\nurgency: low|medium|high\nanswerable: true if a knowledge base likely covers it, else false\n\nTicket: {{ $json.subject }} | {{ $json.message }}"
+            }
+          ]
+        }
+      },
+      "id": "ticket-llm",
+      "name": "AI: Classify Ticket",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [-320, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.answerable }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ticket-if",
+      "name": "IF answerable = true",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-100, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://localhost:8000/ask?question={{ encodeURIComponent($json.message) }}",
+        "authentication": "none",
+        "sendHeaders": false,
+        "sendBody": false,
+        "options": {}
+      },
+      "id": "ticket-rag",
+      "name": "RAG Agent (my rag-support-agent)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [140, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rag = ($input.first().json.json || {});\nconst answerable = rag.escalated === true ? false : true;\nreturn [{\n  json: { ...$json, ragAnswer: rag.answer, ragEscalated: rag.escalated, answerable: !rag.escalated }\n}];"
+      },
+      "id": "ticket-postprocess",
+      "name": "Code: Post-process RAG",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [340, 0]
+    },
+    {
+      "parameters": {
+        "autoDetectLanguage": false,
+        "language": "en",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "ticket-email",
+      "name": "Email: Send Draft Answer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [540, -120]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.ticketId }} :: {{ $json.priority }} :: {{ $json.category }}\nRAG could not answer: {{ $json.message }}",
+        "options": {}
+      },
+      "id": "ticket-escalate",
+      "name": "Slack: Escalate to Human",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 4,
+      "position": [540, 120]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ticket-success",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [540, 260],
+      "webhookId": "6b20cd3f-4e3c-5b7c-ad2e-ticket0000001"
+    }
+  ],
+  "connections": {
+    "Webhook (Ticket created)": {
+      "main": [[{ "node": "Code: Normalize Ticket", "type": "main", "index": 0 }]]
+    },
+    "Code: Normalize Ticket": {
+      "main": [[{ "node": "AI: Classify Ticket", "type": "main", "index": 0 }]]
+    },
+    "AI: Classify Ticket": {
+      "main": [[{ "node": "IF answerable = true", "type": "main", "index": 0 }]]
+    },
+    "IF answerable = true": {
+      "main": [
+        [
+          { "node": "RAG Agent (my rag-support-agent)", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Slack: Escalate to Human", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "RAG Agent (my rag-support-agent)": {
+      "main": [[{ "node": "Code: Post-process RAG", "type": "main", "index": 0 }]]
+    },
+    "Code: Post-process RAG": {
+      "main": [[{ "node": "Email: Send Draft Answer", "type": "main", "index": 0 }]]
+    },
+    "Email: Send Draft Answer": {
+      "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]]
+    },
+    "Slack: Escalate to Human": {
+      "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]]
+    }
+  }
+}

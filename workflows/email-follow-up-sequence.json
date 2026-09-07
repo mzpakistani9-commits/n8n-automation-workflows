@@ -1,0 +1,126 @@
+{
+  "name": "[6] Email Follow-up Sequence",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "id": "drip-trigger",
+      "name": "Schedule (Every 3h, 10:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [-540, 0]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "table": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "list"
+        },
+        "options": {
+          "formula": "AND(stage='nurture', MOD(day(today())-day({lastTouch}),3)=0)"
+        }
+      },
+      "id": "drip-query",
+      "name": "Airtable: Due nurture leads",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 4,
+      "position": [-320, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.stage }}",
+              "rightValue": "nurture",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "drip-if",
+      "name": "IF still nurture",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-100, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "n8n@example.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Following up — {{ $json.name }}",
+        "text": "Hi {{ $json.name }},\n\nA few days ago you requested info. Want to book a 15-min intro call?\n\n— Team",
+        "options": {}
+      },
+      "id": "drip-email",
+      "name": "Email: Follow-up",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [120, 0]
+    },
+    {
+      "parameters": {
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "lastTouch",
+              "fieldValue": "={{ $now.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "table": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "list"
+        }
+      },
+      "id": "drip-update",
+      "name": "Airtable: bump lastTouch",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 4,
+      "position": [340, 0]
+    }
+  ],
+  "connections": {
+    "Schedule (Every 3h, 10:00)": {
+      "main": [[{ "node": "Airtable: Due nurture leads", "type": "main", "index": 0 }]]
+    },
+    "Airtable: Due nurture leads": {
+      "main": [[{ "node": "IF still nurture", "type": "main", "index": 0 }]]
+    },
+    "IF still nurture": {
+      "main": [
+        [{ "node": "Email: Follow-up", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Email: Follow-up": {
+      "main": [[{ "node": "Airtable: bump lastTouch", "type": "main", "index": 0 }]]
+    }
+  }
+}
