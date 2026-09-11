@@ -20,7 +20,10 @@
       "name": "Schedule (Every 3h, 10:00)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
-      "position": [-540, 0]
+      "position": [
+        -540,
+        0
+      ]
     },
     {
       "parameters": {
@@ -38,7 +41,10 @@
       "name": "Airtable: Due nurture leads",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 4,
-      "position": [-320, 0]
+      "position": [
+        -320,
+        0
+      ]
     },
     {
       "parameters": {
@@ -66,7 +72,10 @@
       "name": "IF still nurture",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-100, 0]
+      "position": [
+        -100,
+        0
+      ]
     },
     {
       "parameters": {
@@ -80,7 +89,10 @@
       "name": "Email: Follow-up",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 1,
-      "position": [120, 0]
+      "position": [
+        120,
+        0
+      ]
     },
     {
       "parameters": {
@@ -103,24 +115,58 @@
       "name": "Airtable: bump lastTouch",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 4,
-      "position": [340, 0]
+      "position": [
+        340,
+        0
+      ]
     }
   ],
   "connections": {
     "Schedule (Every 3h, 10:00)": {
-      "main": [[{ "node": "Airtable: Due nurture leads", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Airtable: Due nurture leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Airtable: Due nurture leads": {
-      "main": [[{ "node": "IF still nurture", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "IF still nurture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "IF still nurture": {
       "main": [
-        [{ "node": "Email: Follow-up", "type": "main", "index": 0 }],
+        [
+          {
+            "node": "Email: Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ],
         []
       ]
     },
     "Email: Follow-up": {
-      "main": [[{ "node": "Airtable: bump lastTouch", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Airtable: bump lastTouch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
-  }
+  },
+  "id": "1c0ef610-3098-5287-98b4-b4df92ba397d"
 }

@@ -16,7 +16,10 @@
       "name": "Webhook (Lead form)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-760, 0],
+      "position": [
+        -760,
+        0
+      ],
       "webhookId": "5a1f9c2e-3d2b-4a6b-9c1d-leadhub0001"
     },
     {
@@ -27,11 +30,22 @@
       "name": "Code: Normalize Lead",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-540, 0]
+      "position": [
+        -540,
+        0
+      ]
     },
     {
       "parameters": {
-        "options": {},
+        "options": {
+          "response": {
+            "response": "text",
+            "limit": "500"
+          },
+          "model": {
+            "temperature": 0
+          }
+        },
         "resource": "chat",
         "modelId": {
           "__rl": true,
@@ -46,23 +60,23 @@
             }
           ]
         },
-        "options": {
-          "response": {
-            "response": "text",
-            "limit": "500"
-          },
-          "model": {
-            "temperature": 0
-          }
-        },
         "useOutputParser": true,
         "outputParser": {
           "json": {
             "schema": {
               "properties": [
-                { "key": "score", "type": "integer" },
-                { "key": "tier", "type": "string" },
-                { "key": "reason", "type": "string" }
+                {
+                  "key": "score",
+                  "type": "integer"
+                },
+                {
+                  "key": "tier",
+                  "type": "string"
+                },
+                {
+                  "key": "reason",
+                  "type": "string"
+                }
               ],
               "type": "object"
             },
@@ -76,7 +90,10 @@
       "name": "AI: Qualify Lead",
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 2,
-      "position": [-320, 0]
+      "position": [
+        -320,
+        0
+      ]
     },
     {
       "parameters": {
@@ -104,7 +121,10 @@
       "name": "IF score >= 80",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-100, 0]
+      "position": [
+        -100,
+        0
+      ]
     },
     {
       "parameters": {
@@ -116,7 +136,10 @@
       "name": "Code: Route by Tier",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [120, 0]
+      "position": [
+        120,
+        0
+      ]
     },
     {
       "parameters": {
@@ -144,7 +167,10 @@
       "name": "CRM: Upsert Lead",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 4,
-      "position": [340, 0]
+      "position": [
+        340,
+        0
+      ]
     },
     {
       "parameters": {
@@ -158,7 +184,10 @@
       "name": "Email: Alert Owner",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 1,
-      "position": [340, 120]
+      "position": [
+        340,
+        120
+      ]
     },
     {
       "parameters": {
@@ -168,36 +197,92 @@
       "name": "Respond Success",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [340, 240],
+      "position": [
+        340,
+        240
+      ],
       "webhookId": "5a1f9c2e-3d2b-4a6b-9c1d-leadhub0001"
     }
   ],
   "connections": {
     "Webhook (Lead form)": {
-      "main": [[{ "node": "Code: Normalize Lead", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Normalize Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Code: Normalize Lead": {
-      "main": [[{ "node": "AI: Qualify Lead", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "AI: Qualify Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "AI: Qualify Lead": {
-      "main": [[{ "node": "IF score >= 80", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "IF score >= 80",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "IF score >= 80": {
       "main": [
-        [{ "node": "Code: Route by Tier", "type": "main", "index": 0 }],
-        [{ "node": "Code: Route by Tier", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Code: Route by Tier",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Route by Tier",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Code: Route by Tier": {
       "main": [
         [
-          { "node": "CRM: Upsert Lead", "type": "main", "index": 0 },
-          { "node": "Email: Alert Owner", "type": "main", "index": 0 }
+          {
+            "node": "CRM: Upsert Lead",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email: Alert Owner",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "CRM: Upsert Lead": {
-      "main": [[{ "node": "Respond Success", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
-  }
+  },
+  "id": "056ff7ce-c9db-5aaf-82b4-7e5b9d50d3cf"
 }

@@ -16,7 +16,10 @@
       "name": "Webhook (Ticket created)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-760, 0],
+      "position": [
+        -760,
+        0
+      ],
       "webhookId": "6b20cd3f-4e3c-5b7c-ad2e-ticket0000001"
     },
     {
@@ -27,7 +30,10 @@
       "name": "Code: Normalize Ticket",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-540, 0]
+      "position": [
+        -540,
+        0
+      ]
     },
     {
       "parameters": {
@@ -59,7 +65,10 @@
       "name": "AI: Classify Ticket",
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 2,
-      "position": [-320, 0]
+      "position": [
+        -320,
+        0
+      ]
     },
     {
       "parameters": {
@@ -87,7 +96,10 @@
       "name": "IF answerable = true",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-100, 0]
+      "position": [
+        -100,
+        0
+      ]
     },
     {
       "parameters": {
@@ -102,7 +114,10 @@
       "name": "RAG Agent (my rag-support-agent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [140, 0]
+      "position": [
+        140,
+        0
+      ]
     },
     {
       "parameters": {
@@ -112,7 +127,10 @@
       "name": "Code: Post-process RAG",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [340, 0]
+      "position": [
+        340,
+        0
+      ]
     },
     {
       "parameters": {
@@ -126,7 +144,10 @@
       "name": "Email: Send Draft Answer",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 1,
-      "position": [540, -120]
+      "position": [
+        540,
+        -120
+      ]
     },
     {
       "parameters": {
@@ -137,7 +158,10 @@
       "name": "Slack: Escalate to Human",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 4,
-      "position": [540, 120]
+      "position": [
+        540,
+        120
+      ]
     },
     {
       "parameters": {
@@ -147,41 +171,109 @@
       "name": "Respond 200",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [540, 260],
+      "position": [
+        540,
+        260
+      ],
       "webhookId": "6b20cd3f-4e3c-5b7c-ad2e-ticket0000001"
     }
   ],
   "connections": {
     "Webhook (Ticket created)": {
-      "main": [[{ "node": "Code: Normalize Ticket", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Normalize Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Code: Normalize Ticket": {
-      "main": [[{ "node": "AI: Classify Ticket", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "AI: Classify Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "AI: Classify Ticket": {
-      "main": [[{ "node": "IF answerable = true", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "IF answerable = true",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "IF answerable = true": {
       "main": [
         [
-          { "node": "RAG Agent (my rag-support-agent)", "type": "main", "index": 0 }
+          {
+            "node": "RAG Agent (my rag-support-agent)",
+            "type": "main",
+            "index": 0
+          }
         ],
         [
-          { "node": "Slack: Escalate to Human", "type": "main", "index": 0 }
+          {
+            "node": "Slack: Escalate to Human",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "RAG Agent (my rag-support-agent)": {
-      "main": [[{ "node": "Code: Post-process RAG", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Post-process RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Code: Post-process RAG": {
-      "main": [[{ "node": "Email: Send Draft Answer", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Email: Send Draft Answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Email: Send Draft Answer": {
-      "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Slack: Escalate to Human": {
-      "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
-  }
+  },
+  "id": "55cc80a6-9670-52aa-97da-df3c8f58ef21"
 }

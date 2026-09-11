@@ -16,7 +16,10 @@
       "name": "Webhook (comment/DM)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-760, 0],
+      "position": [
+        -760,
+        0
+      ],
       "webhookId": "8d42ef51-6a5e-7d9e-cf40-sociallead0001"
     },
     {
@@ -27,7 +30,10 @@
       "name": "Code: Extract Lead",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-540, 0]
+      "position": [
+        -540,
+        0
+      ]
     },
     {
       "parameters": {
@@ -59,7 +65,10 @@
       "name": "AI: Buying Intent",
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 2,
-      "position": [-320, 0]
+      "position": [
+        -320,
+        0
+      ]
     },
     {
       "parameters": {
@@ -87,7 +96,10 @@
       "name": "IF isLead = true",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-100, 0]
+      "position": [
+        -100,
+        0
+      ]
     },
     {
       "parameters": {
@@ -110,7 +122,10 @@
       "name": "Forward to Lead Pipeline",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [120, 0]
+      "position": [
+        120,
+        0
+      ]
     },
     {
       "parameters": {
@@ -120,28 +135,76 @@
       "name": "Respond 201 (saved)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [120, 120],
+      "position": [
+        120,
+        120
+      ],
       "webhookId": "8d42ef51-6a5e-7d9e-cf40-sociallead0001"
     }
   ],
   "connections": {
     "Webhook (comment/DM)": {
-      "main": [[{ "node": "Code: Extract Lead", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Extract Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Code: Extract Lead": {
-      "main": [[{ "node": "AI: Buying Intent", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "AI: Buying Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "AI: Buying Intent": {
-      "main": [[{ "node": "IF isLead = true", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "IF isLead = true",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "IF isLead = true": {
       "main": [
-        [{ "node": "Forward to Lead Pipeline", "type": "main", "index": 0 }],
-        [{ "node": "Respond 201 (saved)", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Forward to Lead Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 201 (saved)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Forward to Lead Pipeline": {
-      "main": [[{ "node": "Respond 201 (saved)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond 201 (saved)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
-  }
+  },
+  "id": "f170530f-0a13-5f15-8e28-4d81b817c8b8"
 }
